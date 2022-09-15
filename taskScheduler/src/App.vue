@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
 import Header from "./components/Header.vue";
 import MainContainer from "./components/MainContainer.vue";
-import Footer from "./components/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 </script>
 
@@ -11,7 +9,6 @@ import Navbar from "./components/Navbar.vue";
   <Header />
     <Navbar />
   <MainContainer/>
-<!--  <Footer />-->
   </div>
 </template>
 
