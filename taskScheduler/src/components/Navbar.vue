@@ -19,7 +19,7 @@
   height: 5vh;
   justify-content: center;
   color: white;
-  background-color: #507AA1;
+  background-color: #507aa1;
 }
 
 ul {
