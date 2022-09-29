@@ -1,6 +1,15 @@
 import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
-import { addCategory, addTask, getCategories, getTask, getTasks } from "./sqlite";
+import {
+  addCategory,
+  addTask,
+  getCategories,
+  getTask,
+  getTasks,
+  updateTask,
+  getCategory,
+  deleteTask,
+} from "./sqlite";
 import cors from "cors";
 
 export class Api {
@@ -38,14 +47,21 @@ export class Api {
       });
     });
     this.app.delete("/tasks/:id", (request: Request, response: Response) => {
-      response.send("ok");
+      deleteTask(+request.params.id);
+      response.sendStatus(200);
     });
     this.app.put("/tasks/:id", (request: Request, response: Response) => {
-      response.send("ok");
+      updateTask(request.body);
+      response.sendStatus(200);
     });
 
     this.app.get("/categories", (request: Request, response: Response) => {
       getCategories().then((rows) => {
+        response.send(rows);
+      });
+    });
+    this.app.get("/category/:cat", (request: Request, response: Response) => {
+      getCategory(request.params.cat).then((rows) => {
         response.send(rows);
       });
     });

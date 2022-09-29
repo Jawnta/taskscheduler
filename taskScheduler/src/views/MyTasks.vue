@@ -1,49 +1,106 @@
 <script setup lang="ts"></script>
 <template>
   <div class="my-task-wrapper">
-    <div class="filter-tasks">
+
+    <div class="all-tasks">
       <h2>My Tasks</h2>
 
-      <input
-        id="f_des"
-        v-model="query"
-        placeholder="Search..."
-        type="text"
-        @keyup="filterTasks()"
-      />
-    </div>
-    <div class="all-tasks">
-      <div v-for="task in filteredTasks" class="task">
-        <p v-on:click="setTable(task.id)">{{ task.description }}</p>
+      <div class="filter-tasks">
+        <div class="filterInput">
+          <div class="test">
+          <h3>Filter by:</h3>
+          </div>
+        </div>
+
+        <div class="filterInput">
+          <label for="filter_date">Description</label>
+        <input
+            id="filter_search"
+            v-model="filterData.query"
+            placeholder="Search..."
+            type="text"
+            @keyup="checkFilter()"
+        />
+        </div>
+        <div class="filterInput">
+        <label for="filter_date">Date</label>
+        <input
+            id="filter_date"
+            v-model="filterData.date"
+            type="date"
+            @change="checkFilter()"
+        />
+        </div>
+        <div class="filterInput">
+          <label for="filter_date">Deadline</label>
+        <input
+            id="filter_deadline"
+            v-model="filterData.deadline"
+            type="date"
+            @change="checkFilter()"
+        />
+        </div>
       </div>
+
+
       <p v-if="isLoading">Loading...</p>
-    </div>
-  </div>
-  <div class="task-info-wrapper">
-    <table :class="{ 'hide-table': !tableData.id }">
+      <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Description</th>
-          <th>Category</th>
-          <th>Start date</th>
-          <th>Deadline</th>
+          <th @click="sortById()" class="clickable">ID</th>
+          <th @click="sortByDescription()" class="clickable">Description</th>
+          <th @click="sortByCategory()" class="clickable">Category</th>
+          <th @click="sortByDate()" class="clickable">Start date</th>
+          <th @click="sortByDeadline()" class="clickable">Deadline</th>
           <th>Estimated duration</th>
           <th>Actual duration</th>
+          <th>Elapsed time</th>
+          <th>Status</th>
+          <th>Edit</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td v-for="value in tableData">
-            {{ value }}
+        <tr v-for="task in filteredTasks">
+          <td>
+            {{ task.id }}
           </td>
+          <td>
+            {{ task.description }}
+          </td>
+          <td>
+            {{ task.category }}
+          </td>
+          <td>
+            {{ task.starting_time }}
+          </td>
+          <td>
+            {{ task.deadline }}
+          </td>
+          <td>
+            {{ task.estimated_duration + " hours" }}
+          </td>
+          <td v-if="!task.actual_duration">
+            -
+          </td>
+          <td v-else-if="task.actual_duration">{{ task.actual_duration + " hours" }}</td>
+          <td v-if="!task.elapsed_time">
+            -
+          </td>
+          <td v-else-if="task.elapsed_time">{{ task.elapsed_time + " hours" }}</td>
+          <td>
+            {{ task.status }}
+          </td>
+          <td @click="editTask(task.id)" class="clickable">Edit</td>
         </tr>
       </tbody>
     </table>
   </div>
+  </div>
 </template>
 
 <script>
+import dayjs from "dayjs";
+
 export default {
   async mounted() {
     const response = await fetch("http://localhost:1337/tasks/");
@@ -53,27 +110,125 @@ export default {
     this.isLoading = false;
   },
   methods: {
-    filterTasks() {
-      this.filteredTasks = this.tasks.filter((task) =>
-        task.description.toLowerCase().includes(this.query.toLowerCase())
-      );
+    async editTask (id) {
+      const task = await this.getOneTask(id);
+      this.$router.push({ name: "editTask", params: { id: task.id } });
     },
     async getOneTask(id) {
       const response = await fetch(`http://localhost:1337/tasks/${id}`);
-      console.log(response);
-
       return await response.json();
     },
-    async setTable(id) {
-      const task = await this.getOneTask(id);
-      for (const key of Object.keys(this.tableData)) {
-        this.tableData[key] = task[key];
+    checkFilter() {
+      const filtersToApply = [];
+      if (this.filterData.query) {
+        filtersToApply.push((task) => task.description.toLowerCase().includes(this.filterData.query.toLowerCase()))
+      }
+      if (this.filterData.date) {
+        filtersToApply.push((task) => task.starting_time === this.filterData.date)
+      }
+      if (this.filterData.deadline){
+        filtersToApply.push((task) => task.deadline === this.filterData.deadline)
+      }
+
+      this.filteredTasks = this.tasks.filter((item) => filtersToApply.every(fn => fn(item)))
+
+    },
+    sortById() {
+      switch (this.idSorted){
+        case false:
+          this.idSorted = true;
+          this.filteredTasks.sort((a, b) => {
+            return a.id - b.id;
+          });
+          break;
+        case true:
+          this.idSorted = false;
+          this.filteredTasks.sort((a, b) => {
+            return b.id - a.id;
+          });
+          break;
+      }
+
+    },
+    sortByDescription() {
+
+      switch (this.descriptionSorted){
+        case false:
+          this.descriptionSorted = true;
+          this.filteredTasks.sort((a, b) => {
+            return a.description.localeCompare(b.description);
+          });
+          break;
+        case true:
+          this.descriptionSorted = false;
+          this.filteredTasks.sort((a, b) => {
+            return b.description.localeCompare(a.description);
+          });
+          break;
+      }
+
+    },
+    sortByCategory () {
+      switch (this.categorySorted){
+        case false:
+          this.categorySorted = true;
+          this.filteredTasks.sort((a, b) => {
+            return a.category.localeCompare(b.category);
+          });
+          break;
+        case true:
+          this.categorySorted = false;
+          this.filteredTasks.sort((a, b) => {
+            return b.category.localeCompare(a.category);
+          });
+          break;
+      }
+    },
+    sortByDate() {
+      switch (this.dateSorted){
+        case false:
+          this.dateSorted = true;
+          this.filteredTasks.sort((a, b) => {
+            return dayjs(a.starting_time) - dayjs(b.starting_time);
+          });
+          break;
+          case true:
+            this.dateSorted = false;
+            this.filteredTasks.sort((a, b) => {
+              return dayjs(b.starting_time) - dayjs(a.starting_time);
+            });
+            break;
+      }
+    },
+    sortByDeadline() {
+      switch (this.deadlineSorted){
+        case false:
+          this.deadlineSorted = true;
+          this.filteredTasks.sort((a, b) => {
+            return dayjs(a.starting_time) - dayjs(b.starting_time);
+          });
+          break;
+        case true:
+          this.deadlineSorted = false;
+          this.filteredTasks.sort((a, b) => {
+            return dayjs(b.starting_time) - dayjs(a.starting_time);
+          });
+          break;
       }
     },
   },
   data() {
     return {
-      query: "",
+      filterData: {
+        query: "",
+        date: "",
+        deadline: ""
+      },
+      idSorted: true,
+      descriptionSorted: true,
+      categorySorted: true,
+      dateSorted: true,
+      deadlineSorted: true,
       tasks: [],
       filteredTasks: [],
       isLoading: true,
@@ -92,21 +247,44 @@ export default {
 </script>
 
 <style>
-.filter-tasks h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
+label {
+  margin-bottom: 10px;
+}
+.clickable {
+  cursor: pointer;
 }
 
-.task {
+.clickable th:hover {
+  cursor: pointer;
+}
+.all-tasks h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  align-self: center;
+}
+.filterInput h3 {
+  margin:0;
+}
+.filterInput {
   display: flex;
-  width: 100%;
+  flex-flow: column;
+  align-items: center;
+  margin: 0 20px 20px 0;
 }
 input[type="text"] {
   height: 30px;
-  width: 200px;
+  width: 100px;
   box-sizing: content-box;
   border-radius: 4px;
-  margin: 0;
+
+}
+
+input[type="date"] {
+  height: 30px;
+  width: 100px;
+  box-sizing: content-box;
+  border-radius: 4px;
+
 }
 .my-task-wrapper {
   display: flex;
@@ -119,24 +297,17 @@ input[type="text"] {
 .all-tasks {
   display: flex;
   flex-flow: column;
-  width: 40%;
+  width: 100%;
   font-size: 20px;
-  font-weight: bold;
 }
 
 .filter-tasks {
   display: flex;
-  width: 40%;
-  flex-direction: column;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
 }
 
-.task-info-wrapper {
-  display: flex;
-  margin: 50px;
-  flex-flow: column;
-  width: 100%;
-  height: auto;
-}
 
 table {
   width: 100%;

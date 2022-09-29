@@ -8,6 +8,8 @@ CREATE TABLE "tasks" (
 	"deadline"	REAL NOT NULL,
 	"estimated_duration"	INTEGER NOT NULL,
 	"actual_duration"	INTEGER,
+	"elapsed_time"      INTEGER,
+	"status"            TEXT NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT),
 	FOREIGN KEY(category) REFERENCES categories(id)
 );

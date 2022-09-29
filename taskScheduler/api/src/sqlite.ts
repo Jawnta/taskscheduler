@@ -12,7 +12,9 @@ export const getTasks = () => {
     tasks.starting_time,
     tasks.deadline,
     tasks.estimated_duration,
-    tasks.actual_duration
+    tasks.actual_duration,
+    tasks.elapsed_time,
+    tasks.status
     FROM 
     tasks 
     LEFT JOIN 
@@ -30,6 +32,30 @@ export const getTasks = () => {
   });
 };
 
+export const updateTask = (data: any) => {
+  const db = getDatabase();
+  const sql = `UPDATE tasks 
+  SET 
+  description = "${data.description}",
+  category = "${data.category}",
+  deadline = "${data.deadline}",
+  estimated_duration = ${data.estimated_duration},
+  actual_duration = ${data.actual_duration},
+  elapsed_time = ${data.elapsed_time},
+  status = "${data.status}"
+
+  
+  WHERE id = ${data.id}
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      return console.log(err.message);
+    }
+    console.log("Entry updated");
+  });
+  db.close();
+};
+
 export const addTask = (data: any) => {
   const db = getDatabase();
 
@@ -39,7 +65,8 @@ export const addTask = (data: any) => {
   deadline,
   starting_time,
   estimated_duration,
-  category
+  category,
+    status
   )
   VALUES
   (
@@ -47,7 +74,8 @@ export const addTask = (data: any) => {
   "${data.deadline.value}",
   "${data.startTime.value}",
   "${data.estimation.value}",
-  "${data.selected.value}"
+  "${data.selected.value}",
+   "${data.status.value}"
     )`;
   db.run(sql, (err) => {
     if (err) {
@@ -73,7 +101,6 @@ export const deleteTask = (id: number) => {
 };
 
 export const getTask = (id: number) => {
-
   const db = getDatabase();
 
   const sql = `
@@ -84,7 +111,9 @@ export const getTask = (id: number) => {
     tasks.starting_time,
     tasks.deadline,
     tasks.estimated_duration,
-    tasks.actual_duration
+    tasks.actual_duration,
+    tasks.elapsed_time,
+    tasks.status
     FROM 
     tasks 
     LEFT JOIN 
@@ -98,7 +127,6 @@ export const getTask = (id: number) => {
         throw err;
       }
       db.close();
-      console.log(resolve(rows));
       resolve(rows);
     });
   });
@@ -107,6 +135,20 @@ export const getTask = (id: number) => {
 export const getCategories = () => {
   const db = getDatabase();
   const sql = "SELECT * FROM categories";
+  return new Promise((resolve) => {
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      db.close();
+      resolve(rows);
+    });
+  });
+};
+
+export const getCategory = (category: string) => {
+  const db = getDatabase();
+  const sql = `SELECT * FROM categories WHERE category = "${category}"`;
   return new Promise((resolve) => {
     db.all(sql, [], (err, rows) => {
       if (err) {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import AddTask from "../views/AddTask.vue";
 import MyTasks from "../views/MyTasks.vue";
+import EditTask from "../views/EditTask.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: "/myTasks",
       name: "myTasks",
       component: MyTasks,
+    },
+    {
+      path: "/myTasks/:id",
+      name: "editTask",
+      component: EditTask,
     },
   ],
 });

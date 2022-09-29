@@ -89,7 +89,7 @@
             Choose from list
           </button>
         </div>
-        <button @click="saveData(this.formdata)">Save task</button>
+        <button @click="saveData(this.formdata)" :disabled="disableButton" >Save task</button>
       </form>
     </div>
   </div>
@@ -103,6 +103,7 @@ export default {
     const response = await fetch("http://localhost:1337/categories/");
     this.categories = await response.json();
     if (!this.categories.length){
+      this.formdata.selected.newCat = true;
       this.display.isActive = true;
     }
   },
@@ -136,10 +137,13 @@ export default {
       if (!this.allFieldsValid()) {
         return false;
       }
+      this.disableButton = true;
+
       if (this.formdata.selected.newCat) {
         const newCategory = await this.addCategory(this.formdata.selected);
         data.selected.value = newCategory.id;
       }
+
       const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -171,7 +175,9 @@ export default {
         deadline: { value: "", hasError: false },
         estimation: { value: "", hasError: false },
         selected: { value: "", hasError: false, newCat: false },
+        status: { value: "Not started" }
       },
+      disableButton: false,
       categories: [],
       display: {
         isActive: false,
@@ -182,6 +188,8 @@ export default {
 </script>
 
 <style>
+
+
 .hideDisplay {
   display: none;
 }
@@ -266,4 +274,5 @@ export default {
 .input-error {
   border: 2px solid rgba(255, 0, 0, 0.8);
 }
+
 </style>
