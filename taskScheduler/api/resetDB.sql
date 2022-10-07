@@ -21,3 +21,14 @@ CREATE TABLE "categories" (
 	"category"	TEXT NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
+
+DROP TABLE IF EXISTS user_cap;
+
+CREATE TABLE "user_cap" (
+    "id"	INTEGER NOT NULL,
+    "cap"	INT NOT NULL,
+    PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+INSERT INTO user_cap (cap)
+VALUES(0);

@@ -3,9 +3,10 @@
 <template>
   <div class="navbar">
       <ul>
-      <li><RouterLink to="/">Home</RouterLink></li>
-      <li><RouterLink to="/addTask">Add Task</RouterLink></li>
         <li><RouterLink to="/myTasks">My Tasks</RouterLink></li>
+      <li><RouterLink to="/addTask">Add Task</RouterLink></li>
+        <li><RouterLink to="/timeline">Timeline</RouterLink></li>
+        <li><RouterLink to="/user">User</RouterLink></li>
       </ul>
   </div>
 

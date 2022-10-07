@@ -1,6 +1,14 @@
 <script setup lang="ts"></script>
 <template>
-  <div class="my-task-wrapper">
+  <div class="intro" :class="{'hidden' : !noTasks}">
+    <p>You don't have any tasks right now... Click <span class="clickable" @click="this.$router.push('/addTask')">
+      here</span>
+      to
+      start
+      adding
+      tasks.</p>
+  </div>
+  <div class="my-task-wrapper" :class="{'hidden' : noTasks}">
 
     <div class="all-tasks">
       <h2>My Tasks</h2>
@@ -108,8 +116,17 @@ export default {
     this.tasks = result;
     this.filteredTasks = result;
     this.isLoading = false;
+    this.checkTasks()
   },
   methods: {
+    checkTasks (){
+      if (this.filteredTasks.length) {
+        this.noTasks = false
+        return;
+      }
+      this.noTasks = true
+
+    },
     async editTask (id) {
       const task = await this.getOneTask(id);
       this.$router.push({ name: "editTask", params: { id: task.id } });
@@ -205,13 +222,13 @@ export default {
         case false:
           this.deadlineSorted = true;
           this.filteredTasks.sort((a, b) => {
-            return dayjs(a.starting_time) - dayjs(b.starting_time);
+            return dayjs(a.deadline) - dayjs(b.deadline);
           });
           break;
         case true:
           this.deadlineSorted = false;
           this.filteredTasks.sort((a, b) => {
-            return dayjs(b.starting_time) - dayjs(a.starting_time);
+            return dayjs(b.deadline) - dayjs(a.deadline);
           });
           break;
       }
@@ -232,6 +249,7 @@ export default {
       tasks: [],
       filteredTasks: [],
       isLoading: true,
+      noTasks: true,
       tableData: {
         id: "",
         description: "",
@@ -247,6 +265,12 @@ export default {
 </script>
 
 <style>
+.intro {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  font-size: 24px;
+}
 label {
   margin-bottom: 10px;
 }
@@ -338,7 +362,7 @@ tbody tr:hover {
   background: #014055;
 }
 
-.hide-table {
+.hidden {
   display: none;
 }
 

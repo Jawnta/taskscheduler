@@ -8,7 +8,7 @@ import {
   getTasks,
   updateTask,
   getCategory,
-  deleteTask,
+  deleteTask, getUserCap, updateUserCap,
 } from "./sqlite";
 import cors from "cors";
 
@@ -70,6 +70,17 @@ export class Api {
       addCategory(request.body).then((data) => {
         response.send(data);
       });
+    });
+
+    this.app.get("/userCap", (request: Request, response: Response) => {
+      getUserCap().then((row) => {
+        response.send(row);
+      });
+    });
+
+    this.app.put("/userCap/:hours", (request: Request, response: Response) => {
+      updateUserCap(request.body.cap);
+      response.sendStatus(200);
     });
   };
 }

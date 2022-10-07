@@ -182,3 +182,33 @@ export const addCategory = (data: any) => {
     });
   });
 };
+
+export const getUserCap = () => {
+  const db = getDatabase();
+  const sql = `SELECT * FROM user_cap WHERE id = 1`;
+  return new Promise((resolve) => {
+    db.get(sql, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      db.close();
+      resolve(rows);
+    });
+  });
+};
+
+export const updateUserCap = (hours: number) => {
+  const db = getDatabase();
+  const sql = `UPDATE user_cap 
+  SET 
+  cap = "${hours}"
+  WHERE id = 1
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      return console.log(err.message);
+    }
+    console.log("Entry updated");
+  });
+  db.close();
+};

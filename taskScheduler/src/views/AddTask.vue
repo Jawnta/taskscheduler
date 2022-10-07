@@ -182,6 +182,7 @@ export default {
       display: {
         isActive: false,
       },
+      userCap: {"cap": -1}
     };
   },
 };
