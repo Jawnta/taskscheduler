@@ -168,7 +168,6 @@ export default {
       const userCapWeeks = userCap * numberOfWeeks;
       const availability = userCapWeeks - result;
       const timeLeft = availability - this.formdata.estimation.value;
-      console.log(timeLeft);
       if (timeLeft >= 0) {
         this.available = true;
         return true;
@@ -183,7 +182,6 @@ export default {
         return false;
       }
       await this.validateDates();
-      console.log(this.available, "<-- avail");
       if (this.available === false)
       {
         return false;
