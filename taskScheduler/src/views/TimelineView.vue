@@ -29,7 +29,6 @@ export default {
   async mounted() {
     this.weekCapData = createWeekCapacity();
     this.events = await setEvent(this.weekCapData);
-    console.log(this.weekCapData);
   },
   tasks: [],
   weekCapData: {},
