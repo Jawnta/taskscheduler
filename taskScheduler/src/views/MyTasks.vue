@@ -1,7 +1,8 @@
 <script setup lang="ts"></script>
 <template>
   <div class="intro" :class="{'hidden' : !noTasks}">
-    <p>You don't have any tasks right now... Click <span class="clickable" @click="this.$router.push('/addTask')">
+    <p>You don't have any tasks right now... Click <span class="clickable" @click="this.$router.push('/addTask')"
+                                                         style="text-decoration: underline">
       here</span>
       to
       start
@@ -17,6 +18,9 @@
         <div class="filterInput">
           <div class="test">
           <h3>Filter by:</h3>
+          </div>
+          <div>
+            <button @click="resetFilter()">Reset filter</button>
           </div>
         </div>
 
@@ -48,6 +52,46 @@
             @change="checkFilter()"
         />
         </div>
+        <div class="filterInput">
+          <label for="filter_category">Category</label>
+          <select
+              id="filter_category"
+              v-model="filterData.category"
+              @change="checkFilter()"
+          >
+            <option value="" selected>
+              Category...
+            </option>
+            <option
+                v-for="option in this.categories"
+                :key="option.category"
+                :value="option.category"
+            >
+              {{ option.category }}
+            </option>
+          </select>
+        </div>
+        <div class="filterInput">
+          <label for="filter_status">Status</label>
+          <select
+              id="filter_category"
+              v-model="filterData.status"
+              @change="checkFilter()"
+          >
+            <option value="" selected>
+              Status...
+            </option>
+            <option>
+              Not started
+            </option>
+            <option>
+              In progress
+            </option>
+            <option>
+              Finished
+            </option>
+          </select>
+        </div>
       </div>
 
 
@@ -61,14 +105,20 @@
           <th @click="sortByDate()" class="clickable">Start date</th>
           <th @click="sortByDeadline()" class="clickable">Deadline</th>
           <th>Estimated duration</th>
-          <th>Actual duration</th>
           <th>Elapsed time</th>
+          <th>Actual duration</th>
           <th>Status</th>
           <th>Edit</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="task in filteredTasks">
+        <tr v-for="task in filteredTasks.filter((item) => {
+          if (!this.filterData.status)
+            {
+            return item.status !== 'Finished'
+          }
+          return item
+        })">
           <td>
             {{ task.id }}
           </td>
@@ -87,14 +137,15 @@
           <td>
             {{ task.estimated_duration + " hours" }}
           </td>
-          <td v-if="!task.actual_duration">
-            -
-          </td>
-          <td v-else-if="task.actual_duration">{{ task.actual_duration + " hours" }}</td>
+
           <td v-if="!task.elapsed_time">
             -
           </td>
           <td v-else-if="task.elapsed_time">{{ task.elapsed_time + " hours" }}</td>
+          <td v-if="!task.actual_duration">
+            -
+          </td>
+          <td v-else-if="task.actual_duration">{{ task.actual_duration + " hours" }}</td>
           <td>
             {{ task.status }}
           </td>
@@ -113,12 +164,20 @@ export default {
   async mounted() {
     const response = await fetch("http://localhost:1337/tasks/");
     const result = await response.json();
+    const catResponse = await fetch("http://localhost:1337/categories/");
+    this.categories = await catResponse.json();
     this.tasks = result;
     this.filteredTasks = result;
     this.isLoading = false;
     this.checkTasks()
   },
   methods: {
+    resetFilter(){
+      for (let key in this.filterData) {
+        this.filterData[key] = "";
+        this.checkFilter();
+      }
+    },
     checkTasks (){
       if (this.filteredTasks.length) {
         this.noTasks = false
@@ -135,6 +194,7 @@ export default {
       const response = await fetch(`http://localhost:1337/tasks/${id}`);
       return await response.json();
     },
+
     checkFilter() {
       const filtersToApply = [];
       if (this.filterData.query) {
@@ -146,10 +206,17 @@ export default {
       if (this.filterData.deadline){
         filtersToApply.push((task) => task.deadline === this.filterData.deadline)
       }
+      if (this.filterData.category){
+        filtersToApply.push((task) => task.category === this.filterData.category)
+      }
+      if (this.filterData.status){
+        filtersToApply.push((task) => task.status === this.filterData.status)
+      }
 
       this.filteredTasks = this.tasks.filter((item) => filtersToApply.every(fn => fn(item)))
 
     },
+
     sortById() {
       switch (this.idSorted){
         case false:
@@ -167,6 +234,7 @@ export default {
       }
 
     },
+
     sortByDescription() {
 
       switch (this.descriptionSorted){
@@ -239,7 +307,9 @@ export default {
       filterData: {
         query: "",
         date: "",
-        deadline: ""
+        deadline: "",
+        category: "",
+        status: ""
       },
       idSorted: true,
       descriptionSorted: true,
@@ -303,6 +373,15 @@ input[type="text"] {
 
 }
 
+.filterInput select{
+  height: 30px;
+  width: 100px;
+  box-sizing: content-box;
+  border-radius: 4px;
+  background-color: white;
+
+}
+
 input[type="date"] {
   height: 30px;
   width: 100px;
@@ -318,6 +397,7 @@ input[type="date"] {
   align-items: center;
 }
 
+
 .all-tasks {
   display: flex;
   flex-flow: column;
@@ -332,6 +412,15 @@ input[type="date"] {
   align-items: center;
 }
 
+.all-tasks button {
+  height: 30px;
+  width: 100px;
+  box-sizing: content-box;
+  border-radius: 4px;
+  background-color: white;
+  margin-top: 8px;
+
+}
 
 table {
   width: 100%;
