@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
 import * as isoWeek from 'dayjs/plugin/isoWeek';
+// @ts-ignore
 dayjs.extend((isoWeek));
 
 export const createWeekCapacity = () => {
     const years = ["2022", "2023", "2024", "2025"];
     const numberOfWeeks = 52;
     const weekCapData = {};
-    years.forEach((year : string) => {
+    years.forEach((year) => {
         weekCapData[year] = {};
     });
 
